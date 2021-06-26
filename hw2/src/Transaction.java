@@ -1,8 +1,6 @@
 
 import java.nio.ByteBuffer;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
+import java.security.*;
 import java.security.interfaces.RSAPublicKey;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -327,5 +325,15 @@ public class Transaction {
             hash = hash * 31 + getOutput(i).hashCode();
         }
         return hash;
+    }
+    public void signTx(PrivateKey sk, int input_index) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+        Signature sig = null;
+        sig = Signature.getInstance("SHA256withRSA");
+        sig.initSign(sk);
+        sig.update(this.getRawDataToSign(input_index));
+        // sign the index-th transaction
+        this.addSignature(sig.sign(), input_index);
+        // hash the transaction
+        this.finalize();
     }
 }
